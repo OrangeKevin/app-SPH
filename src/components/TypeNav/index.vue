@@ -84,9 +84,16 @@ export default {
           query.category3Id = category3id;
         }
         //整理完参数
-        location.query = query
-        //路由跳转
-        this.$router.push(location)
+        //判断：如果路由跳转的时候带有params参数，捎带脚传过去
+        if(this.$route.params){
+          location.params = this.$route.params
+          //动态给lacation配置对象添加query属性        location.query = query
+          //路由跳转
+          this.$router.push(location)
+          location.query = query
+          //路由跳转
+          this.$router.push(location)
+        }
       }
     },
     // 当鼠标移入，商品显示
