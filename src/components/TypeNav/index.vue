@@ -3,32 +3,34 @@
   <div class="type-nav">
     <div class="container">
       <!-- 事件委托 -->
-      <div @mouseleave="leaveIndex">
+      <div @mouseleave="leaveIndex" @mouseenter="enterShow">
         <h2 class="all">全部商品分类</h2>
-        <div class="sort">
-          <div class="all-sort-list2" @click="goSearch">
-            <div class="item" v-for="(c1, index) in categoryList" :key="c1.categoryId" :class="{cur: index == currentIndex }">
-              <h3 @mouseenter="changeIndex(index)">
-                <a :data-categoryName="c1.categoryName" :data-category1Id="c1.categoryId">{{c1.categoryName}}</a>
-              </h3>
-              <!-- 二、三级分类 -->
-              <div class="item-list clearfix" :style="{display: index == currentIndex? 'block': 'none' }">
-                <div class="subitem"  v-for="c2 in c1.categoryChild" :key="c2.categoryId">
-                  <dl class="fore">
-                    <dt>
-                      <a :data-categoryName="c2.categoryName" :data-category2Id="c2.categoryId">{{ c2.categoryName }}</a>
-                    </dt>
-                    <dd>
-                      <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
-                        <a :data-categoryName="c3.categoryName" :data-category3Id="c3.categoryId">{{ c3.categoryName }}</a>
-                      </em>
-                    </dd>
-                  </dl>
+        <transition name="sort">
+          <div class="sort" v-show="show">
+            <div class="all-sort-list2" @click="goSearch">
+              <div class="item" v-for="(c1, index) in categoryList" :key="c1.categoryId" :class="{cur: index == currentIndex }">
+                <h3 @mouseenter="changeIndex(index)">
+                  <a :data-categoryName="c1.categoryName" :data-category1Id="c1.categoryId">{{c1.categoryName}}</a>
+                </h3>
+                <!-- 二、三级分类 -->
+                <div class="item-list clearfix" :style="{display: index == currentIndex? 'block': 'none' }">
+                  <div class="subitem"  v-for="c2 in c1.categoryChild" :key="c2.categoryId">
+                    <dl class="fore">
+                      <dt>
+                        <a :data-categoryName="c2.categoryName" :data-category2Id="c2.categoryId">{{ c2.categoryName }}</a>
+                      </dt>
+                      <dd>
+                        <em v-for="c3 in c2.categoryChild" :key="c3.categoryId">
+                          <a :data-categoryName="c3.categoryName" :data-category3Id="c3.categoryId">{{ c3.categoryName }}</a>
+                        </em>
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
       <nav class="nav">
         <a href="###">服装城</a>
@@ -51,7 +53,8 @@ export default {
   name: "TypeNav",
   data() {
     return {
-      currentIndex: -1 //存储用户鼠标移上哪个一级分类
+      currentIndex: -1, //存储用户鼠标移上哪个一级分类
+      show: true
     };
   },
   methods: {
@@ -62,9 +65,6 @@ export default {
     changeIndex:throttle(function(index){
       this.currentIndex = index
     },50),
-    leaveIndex(){
-      this.currentIndex = -1
-    },
     goSearch(event){
       let element = event.target
       //获取到当前触发事件的节点
@@ -88,7 +88,17 @@ export default {
         //路由跳转
         this.$router.push(location)
       }
-    }
+    },
+    // 当鼠标移入，商品显示
+    enterShow(){
+      this.show = true
+    },
+    leaveIndex(){
+      this.currentIndex = -1
+      if(this.$route.path!='/home'){
+        this.show = false
+      }
+    },
   },
   computed: {
     ...mapState({
@@ -96,8 +106,9 @@ export default {
     }),
   },
   mounted() {
-    //通知vuex发请求，获取数据，存储与仓库中
-    this.$store.dispatch("categoryList");
+    if(this.$route.path!='/home'){
+      this.show = false
+    }
   },
 };
 </script>
@@ -215,6 +226,15 @@ export default {
           background: skyblue;
         }
       }
+    }
+    .sort-enter{
+      height: 0px;
+    }
+    .sort-enter-to{
+      height: 461px;
+    }
+    .sort-enter-active{
+      transition: all .5s linear;
     }
   }
 }
